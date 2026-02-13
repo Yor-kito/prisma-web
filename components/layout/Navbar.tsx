@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, BrainCircuit } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export function Navbar({ showBackButton = false }: { showBackButton?: boolean }) {
@@ -24,15 +24,18 @@ export function Navbar({ showBackButton = false }: { showBackButton?: boolean })
                     </Button>
                 )}
 
-                <div className="flex items-center gap-2">
-                    <h1 className="text-2xl font-bold">PRISMA AI</h1>
-                </div>
+                <Link href="/dashboard" className="mr-8 flex items-center space-x-2 group">
+                    <div className="p-1.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                        <BrainCircuit className="h-6 w-6 text-primary" />
+                    </div>
+                    <span className="font-bold text-xl tracking-tight">PRISMA</span>
+                </Link>
 
-                <nav className="flex items-center space-x-6 text-sm font-medium">
-                    <Link href="/dashboard" className="transition-colors hover:text-foreground/80 text-foreground/60">
+                <nav className="flex items-center space-x-8 text-sm font-medium">
+                    <Link href="/dashboard" className="transition-colors hover:text-primary text-muted-foreground">
                         Inicio
                     </Link>
-                    <Link href="/about" className="transition-colors hover:text-foreground/80 text-foreground/60">
+                    <Link href="/about" className="transition-colors hover:text-primary text-muted-foreground">
                         Sobre PRISMA
                     </Link>
                 </nav>

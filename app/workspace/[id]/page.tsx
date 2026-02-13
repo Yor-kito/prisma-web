@@ -46,6 +46,9 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
     // Podcast State
     const [podcastScript, setPodcastScript] = useState<string>("");
 
+    // Chat History for generation context
+    const [chatHistory, setChatHistory] = useState<Array<{ role: string, content: string }>>([]);
+
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
         checkMobile();
@@ -82,6 +85,9 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                 if (doc.podcastScript) {
                     setPodcastScript(doc.podcastScript);
                 }
+                if (doc.chatHistory) {
+                    setChatHistory(doc.chatHistory);
+                }
 
                 // Update last accessed
                 const updatedDocs = documents.map((d: any) =>
@@ -109,10 +115,22 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
         setPdfText(text);
     };
 
+    const getGenerationContext = () => {
+        if (pdfText) return pdfText;
+        if (chatHistory.length > 0) {
+            // Context from chat: only assistant and user messages, excluding system or initial messages
+            return chatHistory
+                .map(m => `${m.role === 'user' ? 'Alumno' : 'Profesor'}: ${m.content}`)
+                .join("\n");
+        }
+        return "";
+    };
+
     const generateStudyArtifacts = async () => {
-        console.log("Generating artifacts. Text length:", pdfText?.length);
-        if (!pdfText) {
-            console.warn("No PDF text found, aborting generation.");
+        const context = getGenerationContext();
+        console.log("Generating artifacts. Context length:", context.length);
+        if (!context) {
+            console.warn("No context found, aborting generation.");
             return;
         }
         setIsGenerating(true);
@@ -120,7 +138,7 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
         try {
             const response = await fetch('/api/generate', {
                 method: 'POST',
-                body: JSON.stringify({ context: pdfText }),
+                body: JSON.stringify({ context }),
             });
             const data = await response.json();
             setArtifacts({
@@ -149,17 +167,15 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
     const isChatOnly = id !== "demo" && !pdfUrl && !pdfText && artifacts?.mindMap === undefined && (id !== "demo");
 
     const generateExam = async () => {
-        console.log("Generating exam. Text length:", pdfText?.length);
-        if (!pdfText) {
-            console.warn("No PDF text found, aborting exam generation.");
-            return;
-        }
+        const context = getGenerationContext();
+        console.log("Generating exam. Context length:", context.length);
+        if (!context) return;
         setIsGeneratingExam(true);
-        setIsSheetOpen(true);
+        setIsSheetOpen(true); // Open sheet to show content or status
         try {
             const response = await fetch('/api/generate-exam', {
                 method: 'POST',
-                body: JSON.stringify({ context: pdfText, numQuestions: 10 }),
+                body: JSON.stringify({ context, numQuestions: 10 }),
             });
             const data = await response.json();
             const questions = data.questions || [];
@@ -261,7 +277,7 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                         </TabsContent>
                         <TabsContent value="podcast" className="mt-6">
                             <PodcastPlayer
-                                pdfText={pdfText}
+                                pdfText={getGenerationContext()}
                                 documentId={id}
                                 onScriptGenerated={(s) => setPodcastScript(s)}
                             />
