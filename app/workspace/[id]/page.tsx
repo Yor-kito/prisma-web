@@ -232,8 +232,8 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                             ) : (
                                 <div className="text-center text-muted-foreground">
                                     <p className="mb-4">No mind map generated yet.</p>
-                                    <Button onClick={generateStudyArtifacts} disabled={!pdfText}>
-                                        Generate Study Aids
+                                    <Button onClick={generateStudyArtifacts} disabled={!getGenerationContext()}>
+                                        Generar Ayudas de Estudio
                                     </Button>
                                 </div>
                             )}
@@ -252,8 +252,8 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                             ) : (
                                 <div className="text-center text-muted-foreground">
                                     <p className="mb-4">No flashcards generated yet.</p>
-                                    <Button onClick={generateStudyArtifacts} disabled={!pdfText}>
-                                        Generate Study Aids
+                                    <Button onClick={generateStudyArtifacts} disabled={!getGenerationContext()}>
+                                        Generar Ayudas de Estudio
                                     </Button>
                                 </div>
                             )}
@@ -269,8 +269,8 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                             ) : (
                                 <div className="text-center text-muted-foreground">
                                     <p className="mb-4">No exam generated yet.</p>
-                                    <Button onClick={generateExam} disabled={!pdfText}>
-                                        Generate Exam
+                                    <Button onClick={generateExam} disabled={!getGenerationContext()}>
+                                        Generar Examen
                                     </Button>
                                 </div>
                             )}
@@ -306,11 +306,11 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
 
             <main className="flex-1 overflow-hidden relative">
                 {/* Floating Action Button for Study Gen */}
-                {pdfText && (
+                {getGenerationContext() && (
                     <div className="absolute top-4 right-4 z-50">
-                        <Button onClick={generateStudyArtifacts} disabled={isGenerating} size="sm" className="shadow-lg">
-                            {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BrainCircuit className="mr-2 h-4 w-4" />}
-                            Generate Study Aids
+                        <Button onClick={generateStudyArtifacts} disabled={isGenerating} size="sm" className="shadow-lg gap-2">
+                            {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <BrainCircuit className="h-4 w-4" />}
+                            Crear Material de Estudio
                         </Button>
                     </div>
                 )}
