@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/select";
 import { FileEdit, Loader2, Download, Copy } from "lucide-react";
 import { useState } from "react";
-import { useChat } from "ai/react";
 
 export function EssayGenerator() {
     const [topic, setTopic] = useState("");
