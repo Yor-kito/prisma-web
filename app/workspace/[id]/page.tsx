@@ -146,6 +146,8 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
         }
     };
 
+    const isChatOnly = id !== "demo" && !pdfUrl && !pdfText && artifacts?.mindMap === undefined && (id !== "demo");
+
     const generateExam = async () => {
         console.log("Generating exam. Text length:", pdfText?.length);
         if (!pdfText) {
@@ -301,30 +303,40 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                     // Mobile View: Tabs
                     <Tabs defaultValue="chat" className="h-full flex flex-col">
                         <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="doc">Document</TabsTrigger>
+                            {!isChatOnly && <TabsTrigger value="doc">Document</TabsTrigger>}
                             <TabsTrigger value="chat">Chat</TabsTrigger>
                         </TabsList>
-                        <TabsContent value="doc" className="flex-1 m-0 p-4 h-full">
-                            <PDFViewer url={pdfUrl} onUpload={handleUpload} />
-                        </TabsContent>
+                        {!isChatOnly && (
+                            <TabsContent value="doc" className="flex-1 m-0 p-4 h-full">
+                                <PDFViewer url={pdfUrl} onUpload={handleUpload} />
+                            </TabsContent>
+                        )}
                         <TabsContent value="chat" className="flex-1 m-0 p-4 h-full">
-                            <ChatInterface initialContext={pdfText} />
+                            <ChatInterface initialContext={pdfText} documentId={id} />
                         </TabsContent>
                     </Tabs>
                 ) : (
                     // Desktop View: Split Panels
                     <ResizablePanelGroup orientation="horizontal" className="h-full rounded-lg border">
-                        <ResizablePanel defaultSize={50} minSize={30}>
-                            <div className="h-full p-4 relative">
-                                <PDFViewer url={pdfUrl} onUpload={handleUpload} />
-                            </div>
-                        </ResizablePanel>
-                        <ResizableHandle withHandle />
-                        <ResizablePanel defaultSize={50} minSize={30}>
-                            <div className="h-full p-4">
-                                <ChatInterface initialContext={pdfText} />
-                            </div>
-                        </ResizablePanel>
+                        {!isChatOnly ? (
+                            <>
+                                <ResizablePanel defaultSize={50} minSize={30}>
+                                    <div className="h-full p-4 relative">
+                                        <PDFViewer url={pdfUrl} onUpload={handleUpload} />
+                                    </div>
+                                </ResizablePanel>
+                                <ResizableHandle withHandle />
+                                <ResizablePanel defaultSize={50} minSize={30}>
+                                    <ChatInterface initialContext={pdfText} documentId={id} />
+                                </ResizablePanel>
+                            </>
+                        ) : (
+                            <ResizablePanel defaultSize={100}>
+                                <div className="h-full max-w-4xl mx-auto p-4">
+                                    <ChatInterface initialContext={pdfText} documentId={id} />
+                                </div>
+                            </ResizablePanel>
+                        )}
                     </ResizablePanelGroup>
                 )}
             </main>

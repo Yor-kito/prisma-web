@@ -5,9 +5,29 @@ import { Send, Sparkles, Bot, User, Loader2, Image as ImageIcon, Mic, X } from "
 import { useRef, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { VoiceInput } from "@/components/voice/VoiceInput";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Save } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Subject } from "@/components/library/LibrarySystem";
 
 interface ChatInterfaceProps {
     initialContext?: string;
+    documentId?: string;
 }
 
 interface Attachment {
@@ -16,13 +36,77 @@ interface Attachment {
     preview: string; // blob url for UI
 }
 
-export function ChatInterface({ initialContext }: ChatInterfaceProps) {
-    const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([
-        { role: 'assistant', content: "¡Hola! Sube un documento para empezar, o pregúntame algo directamente. ¡Incluso puedes enviarme una foto de tus apuntes o usar tu voz!" }
-    ]);
+export function ChatInterface({ initialContext, documentId }: ChatInterfaceProps) {
+    const router = useRouter();
+    const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
     const [input, setInput] = useState("");
     const [attachments, setAttachments] = useState<Attachment[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+
+    // Save dialog state
+    const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+    const [lessonName, setLessonName] = useState("");
+    const [selectedSubjectId, setSelectedSubjectId] = useState("");
+    const [subjects, setSubjects] = useState<Subject[]>([]);
+
+    useEffect(() => {
+        const savedSubjects = localStorage.getItem("prisma-subjects");
+        if (savedSubjects) {
+            setSubjects(JSON.parse(savedSubjects));
+        }
+    }, [isSaveDialogOpen]);
+
+    const handleSaveAsLesson = () => {
+        if (!lessonName.trim() || !selectedSubjectId || messages.length === 0) return;
+
+        const newId = Date.now().toString();
+        const newDoc = {
+            id: newId,
+            name: lessonName,
+            subjectId: selectedSubjectId,
+            uploadedAt: Date.now(),
+            lastAccessed: Date.now(),
+            pdfUrl: "",
+            pdfText: "",
+            chatHistory: messages
+        };
+
+        const documents = JSON.parse(localStorage.getItem("prisma-documents") || "[]");
+        localStorage.setItem("prisma-documents", JSON.stringify([...documents, newDoc]));
+
+        setIsSaveDialogOpen(false);
+        router.push(`/workspace/${newId}`);
+    };
+
+    // Load messages from localStorage on mount or when documentId changes
+    useEffect(() => {
+        if (documentId && documentId !== "demo") {
+            const documents = JSON.parse(localStorage.getItem("prisma-documents") || "[]");
+            const doc = documents.find((d: any) => d.id === documentId);
+            if (doc && doc.chatHistory) {
+                setMessages(doc.chatHistory);
+            } else {
+                setMessages([
+                    { role: 'assistant', content: "¡Hola! Sube un documento para empezar, o pregúntame algo directamente. ¡Incluso puedes enviarme una foto de tus apuntes o usar tu voz!" }
+                ]);
+            }
+        } else {
+            setMessages([
+                { role: 'assistant', content: "¡Hola! Sube un documento para empezar, o pregúntame algo directamente. ¡Incluso puedes enviarme una foto de tus apuntes o usar tu voz!" }
+            ]);
+        }
+    }, [documentId]);
+
+    // Save messages to localStorage whenever they change
+    useEffect(() => {
+        if (documentId && documentId !== "demo" && messages.length > 0) {
+            const documents = JSON.parse(localStorage.getItem("prisma-documents") || "[]");
+            const updatedDocs = documents.map((d: any) =>
+                d.id === documentId ? { ...d, chatHistory: messages } : d
+            );
+            localStorage.setItem("prisma-documents", JSON.stringify(updatedDocs));
+        }
+    }, [messages, documentId]);
     const scrollRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -136,6 +220,58 @@ export function ChatInterface({ initialContext }: ChatInterfaceProps) {
                     </div>
                     <h3 className="font-semibold text-sm">Asistente PRISMA AI</h3>
                 </div>
+
+                {documentId === "demo" && messages.length > 1 && (
+                    <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button variant="outline" size="sm" className="h-8 gap-2">
+                                <Save className="h-3.5 w-3.5" />
+                                Guardar Chat
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Guardar como nueva lección</DialogTitle>
+                                <DialogDescription>
+                                    Asigna un nombre y una asignatura a esta conversación para repasarla más tarde.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="name">Nombre de la lección</Label>
+                                    <Input
+                                        id="name"
+                                        placeholder="Ej: Dudas sobre Integrales"
+                                        value={lessonName}
+                                        onChange={(e) => setLessonName(e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="subject">Asignatura</Label>
+                                    <Select value={selectedSubjectId} onValueChange={setSelectedSubjectId}>
+                                        <SelectTrigger id="subject">
+                                            <SelectValue placeholder="Selecciona una asignatura" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {subjects.map((s) => (
+                                                <SelectItem key={s.id} value={s.id}>
+                                                    {s.icon} {s.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <Button
+                                    className="w-full"
+                                    onClick={handleSaveAsLesson}
+                                    disabled={!lessonName.trim() || !selectedSubjectId}
+                                >
+                                    Guardar en mi Biblioteca
+                                </Button>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                )}
             </div>
 
             <ScrollArea className="flex-1 min-h-0 p-4" ref={scrollRef}>
