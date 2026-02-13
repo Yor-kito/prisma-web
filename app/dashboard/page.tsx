@@ -51,7 +51,7 @@ export default function DashboardPage() {
                     <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
                         <TabsTrigger value="dashboard" className="gap-2">
                             <LayoutDashboard className="h-4 w-4" />
-                            <span className="hidden sm:inline">Dashboard</span>
+                            <span className="hidden sm:inline">Inicio</span>
                         </TabsTrigger>
                         <TabsTrigger value="library" className="gap-2">
                             <Library className="h-4 w-4" />
