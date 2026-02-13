@@ -24,13 +24,13 @@ export function Navbar({ showBackButton = false }: { showBackButton?: boolean })
                     </Button>
                 )}
 
-                <Link href="/" className="mr-6 flex items-center space-x-2">
-                    <span className="hidden font-bold sm:inline-block">PRISMA AI</span>
-                </Link>
+                <div className="flex items-center gap-2">
+                    <h1 className="text-2xl font-bold">PRISMA AI</h1>
+                </div>
 
                 <nav className="flex items-center space-x-6 text-sm font-medium">
                     <Link href="/dashboard" className="transition-colors hover:text-foreground/80 text-foreground/60">
-                        Dashboard
+                        Inicio
                     </Link>
                     <Link href="/about" className="transition-colors hover:text-foreground/80 text-foreground/60">
                         Sobre PRISMA

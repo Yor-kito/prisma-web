@@ -78,6 +78,11 @@ export function Dashboard() {
                 items.push({ docId: doc.id, docName: doc.name, subject, data: doc.podcastScript });
             } else if (type === "Resúmenes" && doc.artifacts?.mindMap) {
                 items.push({ docId: doc.id, docName: doc.name, subject, data: doc.artifacts.mindMap });
+            } else if (type === "Mis Apuntes") {
+                // All docs are notes/apuntes
+                items.push({ docId: doc.id, docName: doc.name, subject, type: doc.pdfUrl ? 'PDF' : 'Chat' });
+            } else if (type === "Tutorías Guardadas" && doc.chatHistory) {
+                items.push({ docId: doc.id, docName: doc.name, subject, data: doc.chatHistory });
             }
         });
 
@@ -89,14 +94,14 @@ export function Dashboard() {
     const statCards = [
         {
             icon: BookOpen,
-            label: "Documentos",
+            label: "Mis Apuntes",
             value: stats.documentsUploaded,
             color: "text-blue-500",
             bgColor: "bg-blue-500/10",
         },
         {
             icon: MessageSquare,
-            label: "Mensajes Chat",
+            label: "Tutorías Guardadas",
             value: stats.chatMessages,
             color: "text-green-500",
             bgColor: "bg-green-500/10",
@@ -151,7 +156,7 @@ export function Dashboard() {
                     <Card
                         key={index}
                         className={`p-4 hover:shadow-lg transition-all cursor-pointer border-transparent hover:border-primary/20 active:scale-95`}
-                        onClick={() => ["Flashcards", "Exámenes", "Podcasts", "Resúmenes"].includes(stat.label) && openExplorer(stat.label)}
+                        onClick={() => openExplorer(stat.label)}
                     >
                         <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-3">
                             <div className={`p-2 rounded-lg ${stat.bgColor}`}>
@@ -219,6 +224,18 @@ export function Dashboard() {
                                     {explorerType === "Resúmenes" && (
                                         <div className="text-sm text-muted-foreground">
                                             Mapa mental y resumen listos para repasar.
+                                        </div>
+                                    )}
+
+                                    {explorerType === "Mis Apuntes" && (
+                                        <div className="text-sm text-muted-foreground italic">
+                                            Material de estudio ({item.type}).
+                                        </div>
+                                    )}
+
+                                    {explorerType === "Tutorías Guardadas" && (
+                                        <div className="text-sm text-muted-foreground line-clamp-1">
+                                            Ultimo mensaje: {item.data[item.data.length - 1]?.content.substring(0, 60)}...
                                         </div>
                                     )}
                                 </div>

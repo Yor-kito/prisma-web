@@ -49,6 +49,7 @@ export interface SavedDocument {
     };
     examQuestions?: any[];
     podcastScript?: string;
+    chatHistory?: Array<{ role: string, content: string }>;
 }
 
 const DEFAULT_COLORS = [
