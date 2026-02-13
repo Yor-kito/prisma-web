@@ -1,0 +1,117 @@
+"use client";
+
+import { Card } from "@/components/ui/card";
+import { BookOpen, MessageSquare, FileText, Headphones, Brain, CheckCircle2 } from "lucide-react";
+import { useEffect, useState } from "react";
+
+interface StudyStats {
+    documentsUploaded: number;
+    chatMessages: number;
+    summariesGenerated: number;
+    podcastsCreated: number;
+    flashcardsCreated: number;
+    examsCompleted: number;
+    studyTime: number; // in minutes
+    streak: number; // days
+}
+
+export function Dashboard() {
+    const [stats, setStats] = useState<StudyStats>({
+        documentsUploaded: 0,
+        chatMessages: 0,
+        summariesGenerated: 0,
+        podcastsCreated: 0,
+        flashcardsCreated: 0,
+        examsCompleted: 0,
+        studyTime: 0,
+        streak: 0,
+    });
+
+    useEffect(() => {
+        // Load stats from localStorage
+        const savedStats = localStorage.getItem('prisma-stats');
+        if (savedStats) {
+            setStats(JSON.parse(savedStats));
+        }
+    }, []);
+
+    const statCards = [
+        {
+            icon: BookOpen,
+            label: "Documentos",
+            value: stats.documentsUploaded,
+            color: "text-blue-500",
+            bgColor: "bg-blue-500/10",
+        },
+        {
+            icon: MessageSquare,
+            label: "Mensajes Chat",
+            value: stats.chatMessages,
+            color: "text-green-500",
+            bgColor: "bg-green-500/10",
+        },
+        {
+            icon: FileText,
+            label: "Resúmenes",
+            value: stats.summariesGenerated,
+            color: "text-purple-500",
+            bgColor: "bg-purple-500/10",
+        },
+        {
+            icon: Headphones,
+            label: "Podcasts",
+            value: stats.podcastsCreated,
+            color: "text-orange-500",
+            bgColor: "bg-orange-500/10",
+        },
+        {
+            icon: Brain,
+            label: "Flashcards",
+            value: stats.flashcardsCreated,
+            color: "text-pink-500",
+            bgColor: "bg-pink-500/10",
+        },
+        {
+            icon: CheckCircle2,
+            label: "Exámenes",
+            value: stats.examsCompleted,
+            color: "text-emerald-500",
+            bgColor: "bg-emerald-500/10",
+        },
+    ];
+
+    return (
+        <div className="space-y-6">
+            <div>
+                <h2 className="text-2xl font-bold mb-2">Tu Progreso</h2>
+                <p className="text-muted-foreground">
+                    Racha actual: <span className="font-semibold text-primary">{stats.streak} días 🔥</span>
+                </p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {statCards.map((stat, index) => (
+                    <Card key={index} className="p-4 hover:shadow-lg transition-shadow">
+                        <div className="flex items-start gap-3">
+                            <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                                <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold">{stat.value}</p>
+                                <p className="text-sm text-muted-foreground">{stat.label}</p>
+                            </div>
+                        </div>
+                    </Card>
+                ))}
+            </div>
+
+            <Card className="p-6">
+                <h3 className="font-semibold mb-4">Tiempo de Estudio</h3>
+                <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold">{stats.studyTime}</span>
+                    <span className="text-muted-foreground">minutos esta semana</span>
+                </div>
+            </Card>
+        </div>
+    );
+}
