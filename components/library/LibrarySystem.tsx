@@ -22,7 +22,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Folder, FileText, Plus, Trash2, Upload, FolderOpen, Edit2 } from "lucide-react";
+import { Folder, FileText, Plus, Trash2, Upload, FolderOpen, Edit2, GraduationCap } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { extractTextFromPDF } from "@/lib/pdf-utils";
@@ -563,9 +563,10 @@ export function LibrarySystem() {
                                                 variant="default"
                                                 size="sm"
                                                 onClick={() => openDocument(doc)}
+                                                className="gap-2"
                                             >
-                                                <FolderOpen className="h-4 w-4 mr-2" />
-                                                Abrir
+                                                <GraduationCap className="h-4 w-4" />
+                                                Entrar a clase
                                             </Button>
                                             <Button
                                                 variant="ghost"

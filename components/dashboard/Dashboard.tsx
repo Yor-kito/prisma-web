@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BookOpen, MessageSquare, FileText, Headphones, Brain, CheckCircle2, Folder, ChevronRight } from "lucide-react";
+import { BookOpen, MessageSquare, FileText, Headphones, Brain, CheckCircle2, Folder, ChevronRight, GraduationCap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Subject, SavedDocument } from "@/components/library/LibrarySystem";
 import Link from "next/link";
@@ -176,7 +176,7 @@ export function Dashboard() {
                 <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
-                            Explorador de {explorerType}
+                            Tus {explorerType}
                         </DialogTitle>
                     </DialogHeader>
 
@@ -194,7 +194,10 @@ export function Dashboard() {
                                             <span className="font-semibold">{item.docName}</span>
                                         </div>
                                         <Link href={`/workspace/${item.docId}`}>
-                                            <Button size="sm" variant="outline">Abrir Lección</Button>
+                                            <Button size="sm" variant="outline" className="gap-2 text-xs">
+                                                <GraduationCap className="h-3 w-3" />
+                                                Ir a Clase
+                                            </Button>
                                         </Link>
                                     </div>
 
