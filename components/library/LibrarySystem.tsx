@@ -22,7 +22,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Folder, FileText, Plus, Trash2, Upload, FolderOpen } from "lucide-react";
+import { Folder, FileText, Plus, Trash2, Upload, FolderOpen, Edit2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { extractTextFromPDF } from "@/lib/pdf-utils";
@@ -83,6 +83,13 @@ export function LibrarySystem() {
     const [uploadSubjectId, setUploadSubjectId] = useState("");
     const [isUploading, setIsUploading] = useState(false);
 
+    // Edit subject dialog
+    const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
+    const [isEditSubjectDialogOpen, setIsEditSubjectDialogOpen] = useState(false);
+    const [editName, setEditName] = useState("");
+    const [editIcon, setEditIcon] = useState("");
+    const [editColor, setEditColor] = useState("");
+
     useEffect(() => {
         loadData();
     }, []);
@@ -130,6 +137,28 @@ export function LibrarySystem() {
             saveSubjects(subjects.filter((s) => s.id !== id));
             saveDocuments(documents.filter((d) => d.subjectId !== id));
         }
+    };
+
+    const startEditingSubject = (subject: Subject) => {
+        setEditingSubject(subject);
+        setEditName(subject.name);
+        setEditIcon(subject.icon);
+        setEditColor(subject.color);
+        setIsEditSubjectDialogOpen(true);
+    };
+
+    const updateSubject = () => {
+        if (!editingSubject || !editName.trim()) return;
+
+        const updatedSubjects = subjects.map(s =>
+            s.id === editingSubject.id
+                ? { ...s, name: editName, icon: editIcon, color: editColor }
+                : s
+        );
+
+        saveSubjects(updatedSubjects);
+        setIsEditSubjectDialogOpen(false);
+        setEditingSubject(null);
     };
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -359,6 +388,56 @@ export function LibrarySystem() {
                 </div>
             </div>
 
+            {/* Edit Subject Dialog */}
+            <Dialog open={isEditSubjectDialogOpen} onOpenChange={setIsEditSubjectDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Editar Asignatura</DialogTitle>
+                        <DialogDescription>
+                            Modifica los detalles de tu asignatura
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div>
+                            <Label className="text-sm font-medium mb-2 block">Nombre</Label>
+                            <Input
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <Label className="text-sm font-medium mb-2 block">Icono</Label>
+                            <div className="flex gap-2 flex-wrap">
+                                {DEFAULT_ICONS.map((icon) => (
+                                    <button
+                                        key={icon}
+                                        onClick={() => setEditIcon(icon)}
+                                        className={`text-2xl p-2 rounded-lg border-2 transition-all ${editIcon === icon ? "border-primary scale-110" : "border-transparent hover:border-muted"}`}
+                                    >
+                                        {icon}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <Label className="text-sm font-medium mb-2 block">Color</Label>
+                            <div className="flex gap-2 flex-wrap">
+                                {DEFAULT_COLORS.map((color) => (
+                                    <button
+                                        key={color}
+                                        onClick={() => setEditColor(color)}
+                                        className={`w-8 h-8 rounded-full ${color} ${editColor === color ? "ring-2 ring-offset-2 ring-primary" : ""}`}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                        <Button onClick={updateSubject} className="w-full" disabled={!editName.trim()}>
+                            Guardar Cambios
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
             {/* Subjects Grid */}
             <div>
                 <h3 className="font-semibold mb-3">Asignaturas</h3>
@@ -399,11 +478,22 @@ export function LibrarySystem() {
                                 onClick={() => setSelectedSubject(subject.id)}
                             >
                                 <div className="text-center space-y-2">
-                                    <div className="flex justify-end">
+                                    <div className="flex justify-end gap-1">
                                         <Button
                                             variant="ghost"
                                             size="icon"
                                             className="h-6 w-6"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                startEditingSubject(subject);
+                                            }}
+                                        >
+                                            <Edit2 className="h-3 w-3" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-6 w-6 text-destructive"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 deleteSubject(subject.id);

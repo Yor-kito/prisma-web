@@ -1,8 +1,10 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { BookOpen, MessageSquare, FileText, Headphones, Brain, CheckCircle2 } from "lucide-react";
+import { BookOpen, MessageSquare, FileText, Headphones, Brain, CheckCircle2, Folder, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Subject, SavedDocument } from "@/components/library/LibrarySystem";
+import Link from "next/link";
 
 interface StudyStats {
     documentsUploaded: number;
@@ -26,12 +28,24 @@ export function Dashboard() {
         studyTime: 0,
         streak: 0,
     });
+    const [subjects, setSubjects] = useState<Subject[]>([]);
+    const [recentDocs, setRecentDocs] = useState<SavedDocument[]>([]);
 
     useEffect(() => {
         // Load stats from localStorage
         const savedStats = localStorage.getItem('prisma-stats');
         if (savedStats) {
             setStats(JSON.parse(savedStats));
+        }
+
+        // Load subjects and recent docs
+        const savedSubjects = localStorage.getItem('prisma-subjects');
+        const savedDocs = localStorage.getItem('prisma-documents');
+        if (savedSubjects) setSubjects(JSON.parse(savedSubjects));
+        if (savedDocs) {
+            const docs = JSON.parse(savedDocs);
+            // Sort by last accessed and take top 3
+            setRecentDocs(docs.sort((a: any, b: any) => b.lastAccessed - a.lastAccessed).slice(0, 3));
         }
     }, []);
 
@@ -103,6 +117,57 @@ export function Dashboard() {
                         </div>
                     </Card>
                 ))}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Asignaturas */}
+                <Card className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-semibold flex items-center gap-2">
+                            <Folder className="h-4 w-4 text-primary" />
+                            Tus Asignaturas
+                        </h3>
+                    </div>
+                    {subjects.length === 0 ? (
+                        <p className="text-sm text-muted-foreground italic">No has creado asignaturas todavía.</p>
+                    ) : (
+                        <div className="space-y-3">
+                            {subjects.slice(0, 4).map((subject) => (
+                                <div key={subject.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-xl">{subject.icon}</span>
+                                        <span className="font-medium text-sm">{subject.name}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </Card>
+
+                {/* Continuar Estudiando */}
+                <Card className="p-6">
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <BookOpen className="h-4 w-4 text-primary" />
+                        Seguir Estudiando
+                    </h3>
+                    {recentDocs.length === 0 ? (
+                        <p className="text-sm text-muted-foreground italic">No hay documentos recientes.</p>
+                    ) : (
+                        <div className="space-y-3">
+                            {recentDocs.map((doc) => (
+                                <Link key={doc.id} href={`/workspace/${doc.id}`}>
+                                    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-primary/5 transition-colors group cursor-pointer border mb-2">
+                                        <div className="flex items-center gap-3">
+                                            <FileText className="h-4 w-4 text-muted-foreground" />
+                                            <span className="text-sm font-medium truncate max-w-[150px] md:max-w-[200px]">{doc.name}</span>
+                                        </div>
+                                        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </Card>
             </div>
 
             <Card className="p-6">

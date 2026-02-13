@@ -55,7 +55,7 @@ export default function DashboardPage() {
                         </TabsTrigger>
                         <TabsTrigger value="library" className="gap-2">
                             <Library className="h-4 w-4" />
-                            <span className="hidden sm:inline">Biblioteca</span>
+                            <span className="hidden sm:inline">Asignaturas</span>
                         </TabsTrigger>
                         <TabsTrigger value="gamification" className="gap-2">
                             <Trophy className="h-4 w-4" />
