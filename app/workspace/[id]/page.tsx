@@ -22,6 +22,7 @@ import { FlashcardCarousel } from "@/components/workspace/FlashcardCarousel";
 import { ExamInterface } from "@/components/workspace/ExamInterface";
 import { PodcastPlayer } from "@/components/workspace/PodcastPlayer";
 import { NotesSystem } from "@/components/workspace/NotesSystem";
+import { SummaryViewer } from "@/components/workspace/SummaryViewer";
 import { ExportMenu } from "@/components/export/ExportMenu";
 import { use } from "react";
 
@@ -45,6 +46,9 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
 
     // Podcast State
     const [podcastScript, setPodcastScript] = useState<string>("");
+
+    // Summary State
+    const [summary, setSummary] = useState<{ briefSummary: string; keyTakeaways: string[]; detailedSummary: string } | null>(null);
 
     // Chat History for generation context
     const [chatHistory, setChatHistory] = useState<Array<{ role: string, content: string }>>([]);
@@ -84,6 +88,9 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                 }
                 if (doc.podcastScript) {
                     setPodcastScript(doc.podcastScript);
+                }
+                if (doc.summary) {
+                    setSummary(doc.summary);
                 }
                 if (doc.chatHistory) {
                     setChatHistory(doc.chatHistory);
@@ -211,12 +218,13 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                         <SheetTitle>Study Aids</SheetTitle>
                     </SheetHeader>
                     <Tabs defaultValue="mindmap" className="py-6">
-                        <TabsList className="grid w-full grid-cols-4">
-                            <TabsTrigger value="mindmap">Mind Map</TabsTrigger>
-                            <TabsTrigger value="flashcards">Flashcards</TabsTrigger>
-                            <TabsTrigger value="exam">Exam</TabsTrigger>
-                            <TabsTrigger value="podcast">Podcast</TabsTrigger>
-                            <TabsTrigger value="notes">Notes</TabsTrigger>
+                        <TabsList className="flex w-full overflow-x-auto gap-1 h-auto flex-wrap">
+                            <TabsTrigger value="mindmap" className="text-xs flex-1 min-w-fit">Mind Map</TabsTrigger>
+                            <TabsTrigger value="flashcards" className="text-xs flex-1 min-w-fit">Flashcards</TabsTrigger>
+                            <TabsTrigger value="exam" className="text-xs flex-1 min-w-fit">Examen</TabsTrigger>
+                            <TabsTrigger value="podcast" className="text-xs flex-1 min-w-fit">Podcast</TabsTrigger>
+                            <TabsTrigger value="resumen" className="text-xs flex-1 min-w-fit">Resumen</TabsTrigger>
+                            <TabsTrigger value="notes" className="text-xs flex-1 min-w-fit">Notas</TabsTrigger>
                         </TabsList>
                         <TabsContent value="mindmap" className="mt-6">
                             {isGenerating ? (
@@ -282,6 +290,21 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                                 onScriptGenerated={(s) => setPodcastScript(s)}
                             />
                         </TabsContent>
+                        <TabsContent value="resumen" className="mt-6">
+                            <SummaryViewer
+                                pdfText={getGenerationContext()}
+                                documentId={id}
+                                savedSummary={summary}
+                                onSummaryGenerated={(s) => {
+                                    setSummary(s);
+                                    const documents = JSON.parse(localStorage.getItem("prisma-documents") || "[]");
+                                    const updatedDocs = documents.map((d: any) =>
+                                        d.id === id ? { ...d, summary: s } : d
+                                    );
+                                    localStorage.setItem("prisma-documents", JSON.stringify(updatedDocs));
+                                }}
+                            />
+                        </TabsContent>
                         <TabsContent value="notes" className="mt-6">
                             <NotesSystem documentId={id} />
                         </TabsContent>
@@ -291,7 +314,7 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                     <div className="mt-6 pt-6 border-t">
                         <ExportMenu
                             data={{
-                                summary: "", // Add summary state if needed
+                                summary: summary?.detailedSummary || "",
                                 flashcards: artifacts?.flashcards || [],
                                 examQuestions,
                                 podcastScript: podcastScript || "",
