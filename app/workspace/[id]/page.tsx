@@ -215,11 +215,11 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetContent side="right" className="w-[400px] sm:w-[540px] overflow-y-auto">
                     <SheetHeader>
-                        <SheetTitle>Study Aids</SheetTitle>
+                        <SheetTitle>📚 Tu material de estudio</SheetTitle>
                     </SheetHeader>
                     <Tabs defaultValue="mindmap" className="py-6">
                         <TabsList className="flex w-full overflow-x-auto gap-1 h-auto flex-wrap">
-                            <TabsTrigger value="mindmap" className="text-xs flex-1 min-w-fit">Mind Map</TabsTrigger>
+                            <TabsTrigger value="mindmap" className="text-xs flex-1 min-w-fit">Mapa Mental</TabsTrigger>
                             <TabsTrigger value="flashcards" className="text-xs flex-1 min-w-fit">Flashcards</TabsTrigger>
                             <TabsTrigger value="exam" className="text-xs flex-1 min-w-fit">Examen</TabsTrigger>
                             <TabsTrigger value="podcast" className="text-xs flex-1 min-w-fit">Podcast</TabsTrigger>
@@ -331,9 +331,9 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                 {/* Floating Action Button for Study Gen */}
                 {getGenerationContext() && (
                     <div className="absolute top-4 right-4 z-50">
-                        <Button onClick={generateStudyArtifacts} disabled={isGenerating} size="sm" className="shadow-lg gap-2">
+                        <Button onClick={() => { generateStudyArtifacts(); setIsSheetOpen(true); }} disabled={isGenerating} size="sm" className="shadow-lg gap-2">
                             {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <BrainCircuit className="h-4 w-4" />}
-                            Crear Material de Estudio
+                            {isGenerating ? "Generando…" : "✨ Estudiar este contenido"}
                         </Button>
                     </div>
                 )}
