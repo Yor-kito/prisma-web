@@ -130,7 +130,8 @@ export default function Home() {
 
       <footer className="container mx-auto px-4 pb-10 text-center text-sm text-muted-foreground">
         <div className="flex justify-center gap-6 mb-4">
-          <Link href="/privacy" className="hover:underline">Privacidad y Términos</Link>
+          <Link href="/privacy" className="hover:underline">Privacidad</Link>
+          <Link href="/terms" className="hover:underline">Términos de Uso (EULA)</Link>
           <Link href="#" className="hover:underline">Soporte</Link>
         </div>
         <p>© 2026 PRISMA AI. Todos los derechos reservados.</p>
